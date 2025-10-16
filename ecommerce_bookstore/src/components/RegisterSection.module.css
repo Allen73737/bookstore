@@ -1,0 +1,43 @@
+.registerContainer {
+  max-width: 470px;
+  margin: 70px auto;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 4px 28px rgba(0,0,0,0.14);
+  padding: 58px 38px;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 730;
+  margin-bottom: 30px;
+  color: #1d8279;
+  text-align: center;
+}
+
+.formField {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.13rem;
+  border-radius: 8px;
+  border: 1.6px solid #b5e6dc;
+  margin-bottom: 22px;
+  background: #f7fafc;
+}
+
+.buttonRegister {
+  width: 100%;
+  padding: 13px;
+  background: #1ea285;
+  color: #fff;
+  font-size: 1.21rem;
+  font-weight: bold;
+  border-radius: 8px;
+  border: none;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.buttonRegister:hover {
+  background: #119f9f;
+}

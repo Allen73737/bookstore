@@ -1,0 +1,125 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 14px 56px;
+  background: transparent;
+  color: #ead58a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.16rem;
+  z-index: 9999;
+  user-select: none;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease, padding 0.3s ease;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.navbarScrolled {
+  background-color: rgba(8, 98, 122, 0.95);
+  box-shadow: 0 3px 34px rgba(196, 190, 149, 0.75);
+  padding: 10px 56px;
+}
+
+.logo {
+  font-family: "Georgia", serif;
+  font-weight: 900;
+  font-size: 2.35rem;
+  color: #d7bf68;
+  cursor: pointer;
+  user-select: none;
+  text-shadow: 0 0 14px #e6d67a;
+  padding-right: 20px;
+}
+
+.navLinks {
+  list-style: none;
+  display: flex;
+  gap: 42px;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  max-width: 60vw;
+  box-sizing: border-box;
+}
+
+.navLinks::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.navLinks::-webkit-scrollbar-thumb {
+  background: #d7bf68;
+  border-radius: 3px;
+}
+
+.navItem {
+  cursor: pointer;
+  transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.15s ease;
+  user-select: none;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.navLink {
+  color: inherit;
+  text-decoration: none;
+  user-select: none;
+}
+.navLink {
+  color: #ead58a !important;
+  font-weight: 700;
+  font-size: 1.16rem;
+}
+
+.activeLink {
+  color: #f7f7d2;
+  text-shadow: 0 0 18px #f7e68a;
+}
+
+@media (max-width: 980px) {
+  .navbar {
+    padding: 10px 26px;
+    font-size: 1.05rem;
+  }
+  .navLinks {
+    max-width: 70vw;
+    gap: 24px;
+  }
+}
+.navItem:focus-visible,
+.navLink:focus-visible {
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+}
+*:focus {
+  outline: none !important;
+}
+.navLink {
+  color: #ead58a;
+  text-decoration: none;
+  user-select: none;
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-size: 1.16rem;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+
+.navItem:hover .navLink {
+  color: #f5e06c;
+  text-shadow: 0 0 30px #f7e68a, 0 0 30px #f7e68a;
+  transform: scale(1.1);
+  transition: all 0.3s ease;
+}
+
+.activeLink {
+  color: #fffacd;
+  text-shadow: 0 0 28px #ffe599, 0 0 55px #ffe599;
+  font-weight: 800;
+  transform: scale(1.15);
+  transition: all 0.3s ease;
+}

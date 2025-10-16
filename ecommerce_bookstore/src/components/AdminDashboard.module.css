@@ -1,0 +1,38 @@
+.adminDashboard {
+  max-width: 1100px;
+  min-height: 600px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 52px 52px;
+  box-shadow: 0 2px 18px rgba(100,70,200,0.11);
+  margin: 60px auto;
+}
+
+.adminTitle {
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: #c434af;
+  margin-bottom: 38px;
+}
+
+.controls {
+  display: flex;
+  gap: 22px;
+  margin-bottom: 20px;
+}
+
+.bookList {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 22px;
+}
+
+.bookList th, .bookList td {
+  padding: 12px 18px;
+  border-bottom: 1.3px solid #f2ebfa;
+  text-align: left;
+}
+
+.actions button {
+  margin-right: 10px;
+}
