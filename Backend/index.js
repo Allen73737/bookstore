@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -32,14 +33,11 @@ app.use("/api/users", userAuthRoutes);
 app.use("/api/admin/books", booksRoutes);
 // app.use("/api/user", userDashboardRoutes);
 
-// Health check endpoint
-app.get("/", (req, res) => {
-  res.send("Backend API is running");
-});
+// Serve Frontend in Production
+app.use(express.static(path.join(__dirname, "../ecommerce_bookstore/dist")));
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: "Endpoint not found" });
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../ecommerce_bookstore/dist/index.html"));
 });
 
 // Start server

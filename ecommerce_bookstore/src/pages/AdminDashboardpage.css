@@ -24,7 +24,7 @@
   box-shadow: var(--shadow-strong);
   max-width: 450px;
   width: 100%;
-  border: 1px solid var(--color-primary-glow);
+  border: 1px solid rgba(234, 213, 138, 0.1);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -73,7 +73,7 @@
   border-radius: var(--border-radius-lg);
   margin-bottom: 40px;
   box-shadow: var(--shadow-soft);
-  border: 1px solid var(--color-primary-glow);
+  border: 1px solid rgba(234, 213, 138, 0.1);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -84,7 +84,7 @@
   color: var(--color-primary);
   font-family: var(--font-heading);
   margin-bottom: 10px;
-  border-bottom: 1px solid var(--color-primary-glow);
+  border-bottom: 1px solid rgba(234, 213, 138, 0.1);
   padding-bottom: 15px;
 }
 
@@ -139,14 +139,14 @@
   gap: 30px;
   align-items: center;
   box-shadow: var(--shadow-soft);
-  border: 1px solid var(--color-primary-glow);
+  border: 1px solid rgba(234, 213, 138, 0.05);
   transition: all 0.3s ease;
 }
 
 .bookListItem:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-strong);
-  border-color: var(--color-primary);
+  border-color: rgba(234, 213, 138, 0.2);
 }
 
 .bookThumb {
@@ -221,15 +221,19 @@
   .formGrid {
     grid-template-columns: 1fr;
   }
+
   .bookListItem {
     flex-direction: column;
     text-align: center;
   }
+
   .bookActions {
     flex-direction: row;
     width: 100%;
   }
-  .btnEdit, .btnDelete {
+
+  .btnEdit,
+  .btnDelete {
     flex: 1;
   }
 }
