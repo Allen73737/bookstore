@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 import "./UserDashboard.css";
 
 const UserDashboard = ({ setUser }) => {
@@ -14,45 +15,58 @@ const UserDashboard = ({ setUser }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("jwtToken");
 
+  const fetchDashboardData = async () => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const [profileRes, cartRes, favRes, recentRes] = await Promise.all([
+        fetch("/api/user/profile", { headers }),
+        fetch("/api/user/cart", { headers }),
+        fetch("/api/user/favorites", { headers }),
+        fetch("/api/user/recent-books", { headers }),
+      ]);
+
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        setUserName(profile.name || "User");
+      }
+      if (cartRes.ok) {
+        const cart = await cartRes.json();
+        setCartItems(Array.isArray(cart) ? cart : []);
+      }
+      if (favRes.ok) {
+        const favs = await favRes.json();
+        setFavoriteBooks(Array.isArray(favs) ? favs : []);
+      }
+      if (recentRes.ok) {
+        const recents = await recentRes.json();
+        setRecentBooks(Array.isArray(recents) ? recents : []);
+      }
+    } catch (err) {
+      console.error("Dashboard fetch error", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!token) {
       navigate("/login");
       return;
     }
-
-    const fetchDashboardData = async () => {
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        const [profileRes, cartRes, favRes, recentRes] = await Promise.all([
-          fetch("/api/user/profile", { headers }),
-          fetch("/api/cart", { headers }),
-          fetch("/api/favorites", { headers }),
-          fetch("/api/recent-books", { headers }),
-        ]);
-
-        if (profileRes.ok) {
-          const profile = await profileRes.json();
-          setUserName(profile.name || "User");
-        }
-        if (cartRes.ok) {
-          const cart = await cartRes.json();
-          setCartItems(Array.isArray(cart) ? cart : []);
-        }
-        if (favRes.ok) {
-          const favs = await favRes.json();
-          setFavoriteBooks(Array.isArray(favs) ? favs : []);
-        }
-        if (recentRes.ok) {
-          const recents = await recentRes.json();
-          setRecentBooks(Array.isArray(recents) ? recents : []);
-        }
-      } catch (err) {
-        console.error("Dashboard fetch error", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDashboardData();
+
+    // Socket.io for real-time updates
+    const socket = io(window.location.origin);
+    
+    socket.on('cartUpdated', () => {
+      fetchDashboardData();
+    });
+    
+    socket.on('favoritesUpdated', () => {
+      fetchDashboardData();
+    });
+
+    return () => socket.disconnect();
   }, [token, navigate]);
 
   const handleLogout = () => {

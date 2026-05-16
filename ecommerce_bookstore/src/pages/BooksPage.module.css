@@ -113,6 +113,13 @@
   border-color: rgba(234, 213, 138, 0.2);
 }
 
+.bookCard.expandedCard:hover {
+  transform: none;
+  box-shadow: var(--shadow-soft);
+  border-color: rgba(234, 213, 138, 0.05);
+  cursor: default;
+}
+
 .coverImg {
   width: 180px;
   height: 270px;
@@ -125,6 +132,10 @@
 
 .bookCard:hover .coverImg {
   transform: translateY(-5px) scale(1.03);
+}
+
+.bookCard.expandedCard:hover .coverImg {
+  transform: none;
 }
 
 .title {

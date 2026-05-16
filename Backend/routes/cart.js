@@ -30,6 +30,7 @@ router.post("/", async (req, res) => {
     }
     await user.save();
     await user.populate("cart.bookId");
+    if (req.io) req.io.emit('cartUpdated');
     res.json(user.cart);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
@@ -49,6 +50,7 @@ router.patch("/:bookId", async (req, res) => {
     item.quantity = quantity;
     await user.save();
     await user.populate("cart.bookId");
+    if (req.io) req.io.emit('cartUpdated');
     res.json(user.cart);
   } catch (err) {
     res.status(500).json({ message: "Server error" });
@@ -64,6 +66,7 @@ router.delete("/:bookId", async (req, res) => {
     user.cart = user.cart.filter((i) => !i.bookId.equals(req.params.bookId));
     await user.save();
     await user.populate("cart.bookId");
+    if (req.io) req.io.emit('cartUpdated');
     res.json(user.cart);
   } catch (err) {
     res.status(500).json({ message: "Server error" });

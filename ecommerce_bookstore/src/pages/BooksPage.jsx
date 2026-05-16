@@ -21,7 +21,7 @@ const BookCard = ({
   return (
     <motion.div
       ref={ref}
-      className={styles.bookCard}
+      className={`${styles.bookCard} ${isExpanded ? styles.expandedCard : ""}`}
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       exit={{ opacity: 0, y: 40 }}
@@ -102,6 +102,20 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    const token = localStorage.getItem("jwtToken");
+    if (token) {
+      fetch("/api/user/favorites", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then(res => res.json())
+        .then(favs => {
+          if (Array.isArray(favs)) {
+            setFavoriteIds(favs.map(f => f._id || f.id));
+          }
+        })
+        .catch(console.error);
+    }
   }, []);
 
   const searchedBooks = search
@@ -120,17 +134,36 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
 
   const closeExpanded = () => setExpandedId(null);
 
-  const toggleFavorite = (book, e) => {
+  const toggleFavorite = async (book, e) => {
     e.stopPropagation();
-    const wasFavorited = favoriteIds.includes(book.id);
-    setFavoriteIds(prev =>
-      wasFavorited ? prev.filter(id => id !== book.id) : [...prev, book.id]
-    );
-    if (updateFavorites) updateFavorites(book);
-    if (wasFavorited) {
-      toast("Removed from favorites", { icon: "💔" });
-    } else {
-      toast.success(`"${book.title}" added to favorites!`);
+    
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      toast.error("Please log in to save favorites.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/user/favorites/${book.id}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setFavoriteIds(prev =>
+          data.isFavorited ? [...prev, book.id] : prev.filter(id => id !== book.id)
+        );
+        if (data.isFavorited) {
+          toast.success(`"${book.title}" added to favorites!`);
+        } else {
+          toast("Removed from favorites", { icon: "💔" });
+        }
+      } else {
+        toast.error("Failed to update favorites.");
+      }
+    } catch (err) {
+      toast.error("Connection error.");
     }
   };
 
