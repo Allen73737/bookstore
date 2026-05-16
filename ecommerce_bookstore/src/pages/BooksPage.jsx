@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import styles from "./BooksPage.module.css";
 
 const BookCard = ({
@@ -14,64 +16,63 @@ const BookCard = ({
   reserveBook
 }) => {
   const [ref, inView] = useInView({ threshold: 0.12, triggerOnce: true });
+  const navigate = useNavigate();
 
   return (
     <motion.div
       ref={ref}
       className={styles.bookCard}
-      initial={{ opacity: 0, scale: 0.9, y: 32 }}
-      animate={inView ? { opacity: 1, scale: 1.02, y: 0 } : {}}
-      exit={{ opacity: 0, scale: 0.75, y: 32 }}
-      whileHover={{ scale: 1.05 }}
+      initial={{ opacity: 0, y: 40 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      exit={{ opacity: 0, y: 40 }}
+      transition={{ duration: 0.6, type: "spring" }}
       onClick={() => onExpand(book.id)}
       tabIndex={0}
     >
       <img src={book.cover} alt={book.title} className={styles.coverImg} />
       <h2 className={styles.title}>{book.title}</h2>
       <p className={styles.author}>{book.author}</p>
+      
       <button
         className={`${styles.heartBtn} ${isFavorited ? styles.favorited : ""}`}
         onClick={e => { e.stopPropagation(); toggleFavorite(book, e); }}
         title="Add to Favorites"
       >
-        {isFavorited ? "♥" : "♡"}
+        <svg width="20" height="20" viewBox="0 0 24 24" fill={isFavorited ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </svg>
       </button>
+
       <AnimatePresence>
         {isExpanded && (
           <motion.div
             className={styles.detailsDropdown}
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 30 }}
-            transition={{ type: "spring", duration: 0.75 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ type: "spring", duration: 0.5 }}
             onClick={e => e.stopPropagation()}
           >
-            <h3>{book.title}</h3>
-            <p style={{ color: "#14532d" }}><b>By:</b> {book.author}</p>
-<p style={{ color: "#14532d" }}><b>Category:</b> {book.category}</p>
-<p style={{ color: "#14532d" }}><b>Price:</b> ₹{book.price}</p>
-
-            {/* <p><b>By:</b> {book.author}</p>
-            {book.category && <p><b>Category:</b> {book.category}</p>}
-            {typeof book.price !== "undefined" && (
-              <p><b>Price:</b> ₹{book.price}</p>
-            )}
-            {book.genre && <p><b>Genre:</b> {book.genre}</p>} */}
-            {book.published && <p><b>Published:</b> {book.published}</p>}
+            <h3 style={{color: "var(--color-primary)", fontFamily: "var(--font-heading)"}}>{book.title}</h3>
+            <p><b>By:</b> <span style={{color: "var(--color-secondary)"}}>{book.author}</span></p>
+            <p><b>Category:</b> {book.category}</p>
+            <p><b>Price:</b> ₹{book.price}</p>
+            
             <p className={styles.bookOverview}>{book.description}</p>
+            
             <div className={styles.dropdownActions}>
               <button
                 className={styles.buyBtn}
-                onClick={() => addToCart && addToCart(book)}
-              >Add to Cart</button>
-              <button
-                className={styles.reserveBtn}
-                onClick={() => reserveBook && reserveBook(book)}
-              >Reserve Now</button>
+                onClick={() => navigate(`/book/${book.id}`)}
+              >
+                View Full Details
+              </button>
               <button
                 className={styles.closeBtn}
                 onClick={closeExpanded}
-              >Close</button>
+              >
+                Close
+              </button>
             </div>
           </motion.div>
         )}
@@ -89,7 +90,7 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
   const [welcomeRef, welcomeInView] = useInView({ threshold: 0.1, triggerOnce: true });
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/admin/books")
+    fetch("/api/admin/books")
       .then(res => res.json())
       .then(data => {
         const formattedBooks = data.map(book => ({
@@ -121,10 +122,16 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
 
   const toggleFavorite = (book, e) => {
     e.stopPropagation();
+    const wasFavorited = favoriteIds.includes(book.id);
     setFavoriteIds(prev =>
-      prev.includes(book.id) ? prev.filter(id => id !== book.id) : [...prev, book.id]
+      wasFavorited ? prev.filter(id => id !== book.id) : [...prev, book.id]
     );
     if (updateFavorites) updateFavorites(book);
+    if (wasFavorited) {
+      toast("Removed from favorites", { icon: "💔" });
+    } else {
+      toast.success(`"${book.title}" added to favorites!`);
+    }
   };
 
   return (
@@ -133,38 +140,36 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 1.2 }}
+      transition={{ duration: 0.8 }}
     >
       <motion.header
         ref={welcomeRef}
         className={styles.header}
         initial={{ opacity: 0, y: -20 }}
         animate={welcomeInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.85 }}
+        transition={{ duration: 0.8 }}
       >
         <motion.h1
           className={styles.welcomeTitle}
-          initial={{ scale: 0.95, y: -18 }}
-          animate={welcomeInView ? { scale: 1.06, y: 0 } : {}}
-          transition={{ duration: 1.2, type: "spring", bounce: 0.4, delay: 0.1 }}
+          initial={{ scale: 0.95 }}
+          animate={welcomeInView ? { scale: 1 } : {}}
+          transition={{ duration: 1, type: "spring" }}
         >
-          Welcome to the World of Books!
+          The Curated Collection
         </motion.h1>
         <motion.p
           className={styles.overview}
-          initial={{ opacity: 0, y: 10 }}
-          animate={welcomeInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 1.1, delay: 0.25 }}
+          initial={{ opacity: 0 }}
+          animate={welcomeInView ? { opacity: 1 } : {}}
+          transition={{ duration: 1, delay: 0.2 }}
         >
-          Discover, explore, and buy your favorite reads.<br />
-          Every book is a new journey—find your next adventure at ReadHaven.
+          Discover our hand-picked selection of literary masterpieces, spanning across timeless classics to modern bestsellers.
         </motion.p>
-        <motion.form
+        <motion.div
           className={styles.searchBar}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={welcomeInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.85, delay: 0.45 }}
-          onSubmit={e => e.preventDefault()}
+          transition={{ duration: 0.8, delay: 0.4 }}
         >
           <input
             type="text"
@@ -173,17 +178,15 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <motion.button
-            className={styles.searchBtn}
-            type="submit"
-            whileHover={{ scale: 1.07, background: "#bce1b5", color: "#054a51" }}
-            whileTap={{ scale: 1.13 }}
-            transition={{ type: "spring", stiffness: 250, damping: 16 }}
-          >
-            🔍
-          </motion.button>
-        </motion.form>
+          <button className={styles.searchBtn}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+        </motion.div>
       </motion.header>
+
       <div className={styles.booksGrid}>
         <AnimatePresence>
           {loading ? (
@@ -192,9 +195,9 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
               className={styles.loadingMsg}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.7 }}
+              transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
             >
-              Loading books...
+              Curating books...
             </motion.p>
           ) : (
             searchedBooks.map(book => (
@@ -213,12 +216,13 @@ const BooksPage = ({ updateFavorites, updateRecentlyWatched, addToCart, reserveB
           )}
         </AnimatePresence>
       </div>
+
       <AnimatePresence>
         {expandedId && (
           <motion.div
             className={styles.overlay}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.55 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeExpanded}
           />

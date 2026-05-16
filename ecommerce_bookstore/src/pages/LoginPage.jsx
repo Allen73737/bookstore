@@ -1,137 +1,130 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+import toast from "react-hot-toast";
 import styles from "./AuthPage.module.css";
 
-const LoginPage = () => {
+const LoginPage = ({ setUser }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const [loginRef, loginInView] = useInView({ threshold: 0.25, triggerOnce: true });
 
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPass, setLoginPass] = useState("");
-  const [loginMessage, setLoginMessage] = useState(null);
-
-  const handleLoginSubmit = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setLoginMessage(null);
+    setError("");
+    setLoading(true);
 
-    fetch("http://localhost:5000/api/users/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: loginEmail, password: loginPass }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Login failed.");
-        setLoginMessage(`Welcome back! You are logged in.`);
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
         localStorage.setItem("jwtToken", data.token);
-        setTimeout(() => navigate("/user-dashboard"), 1800);
-      })
-      .catch((err) => setLoginMessage(err.message || "You are not registered."));
+        if (setUser) setUser({ name: data.name || "User" });
+        toast.success("Welcome back! Signed in successfully.");
+        if (data.role === "admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/user-dashboard");
+        }
+      } else {
+        setError(data.message || "Invalid credentials. Please try again.");
+        toast.error(data.message || "Invalid credentials.");
+      }
+    } catch (err) {
+      setError("An error occurred during login. Please try again.");
+      toast.error("Connection error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <motion.div
-      className={styles.pageRoot}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
-    >
-      <motion.section
-        ref={loginRef}
-        className={styles.authSectionLandscape}
-        initial={{ opacity: 0, y: 40 }}
-        animate={loginInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 1 }}
-        whileHover={{ scale: 1.02, boxShadow: "0 20px 54px #a6a26bbb" }}
+    <div className={styles.authPageContainer}>
+      <motion.div 
+        className={styles.authCard}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, type: "spring" }}
       >
-        <motion.div
-          className={styles.authIntro}
-          initial={{ opacity: 0, x: -18 }}
-          animate={loginInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ delay: 0.15, duration: 0.9 }}
-        >
-          <motion.h1
-            className={styles.welcomeCurvy}
-            initial={{ y: 16, scale: 1 }}
-            animate={loginInView ? { y: 0, scale: 1 } : {}}
-            transition={{ delay: 0.25, duration: 1, type: "spring" }}
-          >
-            Welcome Back
-          </motion.h1>
-          <motion.p
-            className={styles.authOverview}
-            initial={{ opacity: 0, y: 12 }}
-            animate={loginInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.5, duration: 1 }}
-          >
-            Dive into your personalized bookshelf and discover curated selections.
-          </motion.p>
-          <motion.p
-            className={styles.authCaption}
-            initial={{ opacity: 0, y: 12 }}
-            animate={loginInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.65, duration: 1 }}
-          >
-            Sign in to save your favorites, track your reading, and join our book community.
-          </motion.p>
-        </motion.div>
+        <div className={styles.authImageSection}>
+          <img 
+            src="https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1000&q=80" 
+            alt="Library" 
+            className={styles.authImage} 
+          />
+          <div className={styles.authImageOverlay}></div>
+        </div>
 
-        <motion.form
-          className={styles.authForm}
-          onSubmit={handleLoginSubmit}
-          initial={{ opacity: 0 }}
-          animate={loginInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.9, duration: 1 }}
-        >
-          <motion.input
-            type="email"
-            placeholder="Email"
-            className={styles.authInput}
-            value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
-            required
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={loginInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 0.3, duration: 0.7 }}
-          />
-          <motion.input
-            type="password"
-            placeholder="Password"
-            className={styles.authInput}
-            value={loginPass}
-            onChange={(e) => setLoginPass(e.target.value)}
-            required
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={loginInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 0.4, duration: 0.7 }}
-          />
-          <motion.button
-            type="submit"
-            className={`${styles.authBtn} ${styles.shimmerBtn}`}
-            whileHover={{ scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 300, damping: 22 }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={loginInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 0.5, duration: 0.7 }}
+        <div className={styles.authFormSection}>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
           >
-            Login
-          </motion.button>
-          {loginMessage && (
-            <motion.div
-              className={styles.loginMessage}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-            >
-              {loginMessage}
-            </motion.div>
-          )}
-        </motion.form>
-      </motion.section>
-    </motion.div>
+            <h2 className={styles.authTitle}>Welcome Back</h2>
+            <p className={styles.authSubtitle}>Sign in to continue your literary journey.</p>
+            <div className="shimmer-line" style={{margin: '0 0 30px'}}></div>
+
+            {error && (
+              <motion.div 
+                className={styles.errorMsg}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+              >
+                {error}
+              </motion.div>
+            )}
+
+            <form className={styles.authForm} onSubmit={handleLogin}>
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>Email Address</label>
+                <input
+                  type="email"
+                  className="premium-input"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>Password</label>
+                <input
+                  type="password"
+                  className="premium-input"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className={`premium-btn ${styles.submitBtn}`}
+                disabled={loading}
+              >
+                {loading ? "Authenticating..." : "Sign In"}
+              </button>
+            </form>
+
+            <div className={styles.switchAuth}>
+              Don't have an account? 
+              <Link to="/register">Create one here</Link>
+            </div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </div>
   );
 };
 

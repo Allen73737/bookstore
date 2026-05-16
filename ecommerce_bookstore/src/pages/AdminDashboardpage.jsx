@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { motion } from "framer-motion";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 import "./AdminDashboardpage.css";
-
-const BACKEND_URL = "http://localhost:5000";
 
 const AdminLogin = ({ onSuccess }) => {
   const [email, setEmail] = useState("");
@@ -23,49 +19,68 @@ const AdminLogin = ({ onSuccess }) => {
     setError("");
     setLoading(true);
     try {
-      const res = await axios.post(`${BACKEND_URL}/api/admin/login`, { email, password });
-      if (res.data?.success && res.data?.token) {
-        localStorage.setItem("adminToken", res.data.token);
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem("adminToken", data.token);
+        toast.success("Admin access granted.");
         onSuccess();
       } else {
-        setError(res.data?.message || "Invalid credentials");
+        setError(data.message || "Invalid credentials");
+        toast.error(data.message || "Invalid credentials.");
       }
     } catch (err) {
-      setError("Invalid credentials");
+      toast.error("Connection error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <motion.div className="login-overlay"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-      <motion.form className="login-container" onSubmit={handleLogin}
-        initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}>
-        <h2 className="login-title">Admin Login</h2>
-        {error && <div className="error-message">{error}</div>}
-        <input
-          ref={firstInputRef}
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={loading}
-          autoComplete="username"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={loading}
-          autoComplete="current-password"
-          required
-        />
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+    <motion.div className="loginOverlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <motion.form 
+        className="loginContainer" 
+        onSubmit={handleLogin}
+        initial={{ scale: 0.9, opacity: 0, y: 20 }} 
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, type: "spring" }}
+      >
+        <h2 className="loginTitle">Admin Portal</h2>
+        {error && <div className="errorMessage">{error}</div>}
+        
+        <div className="formGroup">
+          <label>Admin Email</label>
+          <input
+            ref={firstInputRef}
+            type="email"
+            className="premium-input"
+            placeholder="Enter admin email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            required
+          />
+        </div>
+
+        <div className="formGroup">
+          <label>Password</label>
+          <input
+            type="password"
+            className="premium-input"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            required
+          />
+        </div>
+
+        <button type="submit" className="premium-btn" disabled={loading} style={{marginTop: "10px"}}>
+          {loading ? "Authenticating..." : "Access Dashboard"}
         </button>
       </motion.form>
     </motion.div>
@@ -79,20 +94,21 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    AOS.init({ duration: 800, easing: "ease-out", once: true });
     fetchBooks();
   }, []);
 
   const fetchBooks = async () => {
     try {
       const token = localStorage.getItem("adminToken");
-      const res = await axios.get(`${BACKEND_URL}/api/admin/books`, {
+      const res = await fetch("/api/admin/books", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const mappedBooks = (res.data || []).map(b => ({ ...b, id: b._id }));
-      setBooks(mappedBooks);
-    } catch {
-      alert("Failed to fetch books");
+      if (res.ok) {
+        const data = await res.json();
+        setBooks((data || []).map(b => ({ ...b, id: b._id })));
+      }
+    } catch (err) {
+      console.error("Failed to fetch books", err);
     }
   };
 
@@ -129,130 +145,158 @@ const AdminDashboard = () => {
     if (!validateForm()) return;
     setLoading(true);
     const token = localStorage.getItem("adminToken");
+    
     try {
-      if (formState.id) {
-        // Edit book
-        await axios.put(`${BACKEND_URL}/api/admin/books/${formState.id}`, formState, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        alert("Book Updated");
+      const url = formState.id ? `/api/admin/books/${formState.id}` : "/api/admin/books";
+      const method = formState.id ? "PUT" : "POST";
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(formState)
+      });
+      
+      if (res.ok) {
+        toast.success(formState.id ? "Book updated successfully!" : "Book added successfully!");
+        fetchBooks();
+        cancelForm();
       } else {
-        // Add book
-        await axios.post(`${BACKEND_URL}/api/admin/books`, formState, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        alert("Book Added");
+        toast.error("Operation failed. Check your inputs.");
       }
-      fetchBooks();
-      cancelForm();
     } catch (err) {
-      alert("Error saving");
-      console.error("Save error:", err.response || err);
+      toast.error("An error occurred.");
     } finally {
       setLoading(false);
     }
   };
 
   const deleteBook = async (id) => {
-    if (!window.confirm("Are you sure to delete?")) return;
+    if (!window.confirm("Are you sure you want to delete this book? This action cannot be undone.")) return;
     const token = localStorage.getItem("adminToken");
     try {
-      await axios.delete(`${BACKEND_URL}/api/admin/books/${id}`, {
+      const res = await fetch(`/api/admin/books/${id}`, {
+        method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Deleted");
-      fetchBooks();
+      if (res.ok) {
+        toast.success("Book deleted.");
+        fetchBooks();
+      }
     } catch (err) {
-      alert("Error deleting");
-      console.error("Delete error:", err.response || err);
+      toast.error("Error deleting book.");
     }
   };
 
   return (
-    <motion.div className="admin-dashboard" data-aos="fade-up"
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-      transition={{ duration: 0.7 }}>
-      <h2 className="dashboard-title">Admin Dashboard - Book Management</h2>
-      {!formState && (
-        <motion.button
-          className="btn primary" onClick={startAdd}
-          data-aos="fade-down"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.4 }}>
-          Add New Book
-        </motion.button>
-      )}
-      {formState && (
-        <motion.form
-          className="book-form" onSubmit={submitForm}
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}>
-          <h3>{formState.id ? "Edit Book" : "Add Book"}</h3>
-          <label>
-            Title
-            <input name="title" value={formState.title} onChange={handleFormChange} />
-            {formErrors.title && <span className="error">{formErrors.title}</span>}
-          </label>
-          <label>
-            Author
-            <input name="author" value={formState.author} onChange={handleFormChange} />
-            {formErrors.author && <span className="error">{formErrors.author}</span>}
-          </label>
-          <label>
-            Price
-            <input name="price" value={formState.price} onChange={handleFormChange} />
-            {formErrors.price && <span className="error">{formErrors.price}</span>}
-          </label>
-          <label>
-            Category
-            <input name="category" value={formState.category} onChange={handleFormChange} />
-            {formErrors.category && <span className="error">{formErrors.category}</span>}
-          </label>
-          <label>
-            Cover Image URL
-            <input name="coverImage" value={formState.coverImage} onChange={handleFormChange} />
-            {formErrors.coverImage && <span className="error">{formErrors.coverImage}</span>}
-          </label>
-          <label>
-            Description
-            <textarea name="description" value={formState.description} onChange={handleFormChange} />
-            {formErrors.description && <span className="error">{formErrors.description}</span>}
-          </label>
-          <div className="form-actions">
-            <motion.button type="submit" className="btn success" disabled={loading}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3 }}>
-              {loading ? "Saving..." : "Save"}
-            </motion.button>
-            <button type="button" onClick={cancelForm} className="btn cancel">
-              Cancel
-            </button>
-          </div>
-        </motion.form>
-      )}
-      <ul className="book-list">
-        {books.map((book) => (
-          <motion.li key={book.id} className="book-list-item"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}>
-            <img src={book.coverImage} alt={book.title} className="book-thumb" />
-            <div className="book-info">
-              <h4>{book.title}</h4>
-              <div>Author: {book.author}</div>
-              <div>Category: {book.category}</div>
-              <div>Price: {book.price}</div>
-              <div>Description: {book.description}</div>
+    <motion.div 
+      className="adminDashboard"
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <div className="dashboardHeader">
+        <h2 className="dashboardTitle">Inventory Management</h2>
+        {!formState && (
+          <button className="premium-btn" onClick={startAdd}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}>
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add New Book
+          </button>
+        )}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {formState && (
+          <motion.form
+            className="bookForm" 
+            onSubmit={submitForm}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h3>{formState.id ? "Edit Book Details" : "Add New Book"}</h3>
+            
+            <div className="formGrid">
+              <div className="formGroup">
+                <label>Title</label>
+                <input className="premium-input" name="title" value={formState.title} onChange={handleFormChange} placeholder="Book Title" />
+                {formErrors.title && <span className="error">{formErrors.title}</span>}
+              </div>
+              
+              <div className="formGroup">
+                <label>Author</label>
+                <input className="premium-input" name="author" value={formState.author} onChange={handleFormChange} placeholder="Author Name" />
+                {formErrors.author && <span className="error">{formErrors.author}</span>}
+              </div>
+              
+              <div className="formGroup">
+                <label>Price (₹)</label>
+                <input className="premium-input" name="price" value={formState.price} onChange={handleFormChange} placeholder="e.g. 499" />
+                {formErrors.price && <span className="error">{formErrors.price}</span>}
+              </div>
+              
+              <div className="formGroup">
+                <label>Category</label>
+                <input className="premium-input" name="category" value={formState.category} onChange={handleFormChange} placeholder="e.g. Fiction" />
+                {formErrors.category && <span className="error">{formErrors.category}</span>}
+              </div>
+              
+              <div className="formGroup fullWidth">
+                <label>Cover Image URL</label>
+                <input className="premium-input" name="coverImage" value={formState.coverImage} onChange={handleFormChange} placeholder="https://..." />
+                {formErrors.coverImage && <span className="error">{formErrors.coverImage}</span>}
+              </div>
+              
+              <div className="formGroup fullWidth">
+                <label>Description</label>
+                <textarea className="premium-input" style={{resize: 'vertical', minHeight: '100px'}} name="description" value={formState.description} onChange={handleFormChange} placeholder="Write a compelling description..." />
+                {formErrors.description && <span className="error">{formErrors.description}</span>}
+              </div>
             </div>
-            <div className="book-actions">
-              <button onClick={() => startEdit(book)} className="btn edit">Edit</button>
-              <button onClick={() => deleteBook(book.id)} className="btn delete">Delete</button>
+
+            <div className="formActions">
+              <button type="submit" className="premium-btn" disabled={loading}>
+                {loading ? "Saving..." : "Save Book"}
+              </button>
+              <button type="button" onClick={cancelForm} className="premium-btn-outline">
+                Cancel
+              </button>
             </div>
-          </motion.li>
-        ))}
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      <ul className="bookList">
+        <AnimatePresence>
+          {books.map((book) => (
+            <motion.li 
+              key={book.id} 
+              className="bookListItem"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              layout
+            >
+              <img src={book.coverImage} alt={book.title} className="bookThumb" />
+              <div className="bookInfo">
+                <h4>{book.title}</h4>
+                <p><strong>Author:</strong> {book.author}</p>
+                <p><strong>Category:</strong> {book.category}</p>
+                <p><strong>Price:</strong> ₹{book.price}</p>
+              </div>
+              <div className="bookActions">
+                <button onClick={() => startEdit(book)} className="btnEdit">Edit</button>
+                <button onClick={() => deleteBook(book.id)} className="btnDelete">Delete</button>
+              </div>
+            </motion.li>
+          ))}
+        </AnimatePresence>
       </ul>
     </motion.div>
   );
@@ -261,12 +305,17 @@ const AdminDashboard = () => {
 const AdminDashboardpage = () => {
   const [loggedIn, setLoggedIn] = useState(false);
 
+  useEffect(() => {
+    const token = localStorage.getItem("adminToken");
+    if (token) setLoggedIn(true);
+  }, []);
+
   return (
-    <div className="admin-panel-container">
-      {!loggedIn && <AdminLogin onSuccess={() => setLoggedIn(true)} />}
-      <div className={`admin-dashboard-wrapper ${loggedIn ? "" : "blurred"}`}>
-        {loggedIn && <AdminDashboard />}
-      </div>
+    <div className="adminPanelContainer">
+      <AnimatePresence>
+        {!loggedIn && <AdminLogin onSuccess={() => setLoggedIn(true)} />}
+      </AnimatePresence>
+      {loggedIn && <AdminDashboard />}
     </div>
   );
 };

@@ -1,0 +1,186 @@
+.pageContainer {
+  min-height: 80vh;
+  background-color: #054a51;
+  padding: 60px 20px;
+  font-family: 'Poppins', sans-serif;
+  color: #e7e4d1;
+}
+
+.headerSection {
+  max-width: 1000px;
+  margin: 0 auto 50px;
+  text-align: center;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #ead58a;
+  margin-bottom: 15px;
+  font-family: 'Georgia', serif;
+  letter-spacing: 0.05em;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #a4ceb3;
+  font-weight: 300;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.reservationsGrid {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.reservationCard {
+  background: #043a40;
+  border-radius: 20px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(234, 213, 138, 0.05);
+}
+
+.reservationCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
+  border-color: rgba(234, 213, 138, 0.2);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.statusBadge {
+  padding: 6px 12px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.statusActive {
+  background: rgba(164, 206, 179, 0.2);
+  color: #a4ceb3;
+  border: 1px solid #a4ceb3;
+}
+
+.statusPending {
+  background: rgba(234, 213, 138, 0.2);
+  color: #ead58a;
+  border: 1px solid #ead58a;
+}
+
+.dateInfo {
+  font-size: 0.85rem;
+  color: #8bb3a1;
+}
+
+.bookTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.bookAuthor {
+  font-size: 1rem;
+  color: #a4ceb3;
+  font-style: italic;
+  margin-bottom: 25px;
+}
+
+.actionBtn {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid #ead58a;
+  color: #ead58a;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.actionBtn:hover {
+  background: #ead58a;
+  color: #054a51;
+}
+
+.emptyState {
+  max-width: 600px;
+  margin: 80px auto;
+  text-align: center;
+  background: #043a40;
+  padding: 60px;
+  border-radius: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  border: 1px dashed rgba(234, 213, 138, 0.3);
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  background: rgba(234, 213, 138, 0.1);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 25px;
+  color: #ead58a;
+}
+
+.emptyTitle {
+  font-size: 1.8rem;
+  color: #ead58a;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.emptyDesc {
+  color: #a4ceb3;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.browseBtn {
+  background: #ead58a;
+  color: #054a51;
+  padding: 15px 35px;
+  border-radius: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.2s ease;
+  font-family: 'Poppins', sans-serif;
+}
+
+.browseBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(234, 213, 138, 0.2);
+}
+
+.loadingWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 1.5rem;
+  color: #ead58a;
+  font-family: 'Georgia', serif;
+}

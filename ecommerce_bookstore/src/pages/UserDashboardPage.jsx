@@ -1,83 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence, useViewportScroll, useTransform } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import "./UserDashboard.css";
-
-const AnimatedWelcome = ({ userName }) => {
-  const welcomeText = `Welcome to ReadHaven, ${userName}!`;
-  const [displayText, setDisplayText] = useState("");
-  const [zoomInComplete, setZoomInComplete] = useState(false);
-
-  useEffect(() => {
-    let index = 0;
-    const typingInterval = setInterval(() => {
-      setDisplayText(welcomeText.slice(0, index + 1));
-      index++;
-      if (index === welcomeText.length) clearInterval(typingInterval);
-    }, 80);
-
-    const zoomTimeout = setTimeout(() => {
-      setZoomInComplete(true);
-    }, 2000);
-
-    return () => {
-      clearInterval(typingInterval);
-      clearTimeout(zoomTimeout);
-    };
-  }, [welcomeText]);
-
-  return (
-    <AnimatePresence>
-      <motion.h2
-        key="welcome-text"
-        className="text-gradient splash-font"
-        style={{ whiteSpace: "nowrap", overflow: "hidden", marginBottom: "2.5rem" }}
-        initial={{ opacity: 0, scale: 0.7 }}
-        animate={{ opacity: 1, scale: zoomInComplete ? 1 : 1.2 }}
-        transition={{ duration: 2, ease: "easeOut" }}
-      >
-        {displayText}
-        <motion.span
-          animate={{ opacity: zoomInComplete ? [0, 1, 0] : 0 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-          style={{ display: "inline-block" }}
-        >
-          |
-        </motion.span>
-      </motion.h2>
-    </AnimatePresence>
-  );
-};
-
-const containerVariants = {
-  hidden: { opacity: 0, x: -50 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.8, ease: "easeOut" },
-  },
-  hover: {
-    scale: 1.05,
-    boxShadow: "0 8px 15px rgba(0,0,0,0.2)",
-    transition: { duration: 0.3 },
-  },
-};
-
-const bookCardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" },
-  }),
-  hover: {
-    scale: 1.07,
-    boxShadow: "0 12px 25px rgba(0,0,0,0.2)",
-  },
-};
 
 const UserDashboard = ({ setUser }) => {
   const [cartItems, setCartItems] = useState([]);
@@ -87,12 +12,7 @@ const UserDashboard = ({ setUser }) => {
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
-
   const token = localStorage.getItem("jwtToken");
-
-  const { scrollY } = useViewportScroll();
-  const logoutOpacity = useTransform(scrollY, [0, 100], [0, 1]);
-  const logoutScale = useTransform(scrollY, [0, 100], [0.7, 1]);
 
   useEffect(() => {
     if (!token) {
@@ -100,207 +20,158 @@ const UserDashboard = ({ setUser }) => {
       return;
     }
 
-    AOS.init({ duration: 900, easing: "ease-out-cubic", once: true });
+    const fetchDashboardData = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const [profileRes, cartRes, favRes, recentRes] = await Promise.all([
+          fetch("/api/user/profile", { headers }),
+          fetch("/api/cart", { headers }),
+          fetch("/api/favorites", { headers }),
+          fetch("/api/recent-books", { headers }),
+        ]);
 
-    const axiosInstance = axios.create({
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    Promise.all([
-      axiosInstance.get("/api/user/profile"),
-      axiosInstance.get("/api/cart"),
-      axiosInstance.get("/api/favorites"),
-      axiosInstance.get("/api/recent-books"),
-    ])
-      .then(([profileRes, cartRes, favRes, recentRes]) => {
-        setUserName(profileRes.data.name || "User");
-        setCartItems(Array.isArray(cartRes.data) ? cartRes.data : []);
-        setFavoriteBooks(Array.isArray(favRes.data) ? favRes.data : []);
-        setRecentBooks(Array.isArray(recentRes.data) ? recentRes.data : []);
-      })
-      .catch(() => {
-        setUser(null);
-        navigate("/login");
-      })
-      .finally(() => setLoading(false));
-  }, [token, navigate, setUser]);
+        if (profileRes.ok) {
+          const profile = await profileRes.json();
+          setUserName(profile.name || "User");
+        }
+        if (cartRes.ok) {
+          const cart = await cartRes.json();
+          setCartItems(Array.isArray(cart) ? cart : []);
+        }
+        if (favRes.ok) {
+          const favs = await favRes.json();
+          setFavoriteBooks(Array.isArray(favs) ? favs : []);
+        }
+        if (recentRes.ok) {
+          const recents = await recentRes.json();
+          setRecentBooks(Array.isArray(recents) ? recents : []);
+        }
+      } catch (err) {
+        console.error("Dashboard fetch error", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, [token, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
-    setUser(null);
+    if (setUser) setUser(null);
+    toast.success("Logged out successfully.");
     navigate("/");
   };
 
-  const axiosInstance = axios.create({
-    headers: { Authorization: token ? `Bearer ${token}` : "" },
-  });
-
-  const addToFavorites = (bookId) => {
-    axiosInstance
-      .post(`/api/favorites/${bookId}`)
-      .then((res) => {
-        setFavoriteBooks(res.data);
-      })
-      .catch(console.error);
-  };
-
-  const addToRecent = (bookId) => {
-    axiosInstance
-      .post(`/api/recent-books/${bookId}`)
-      .then((res) => {
-        setRecentBooks(res.data);
-      })
-      .catch(console.error);
-  };
-
-  const handleBookClick = (book) => {
-    addToRecent(book._id);
-    navigate(`/book/${book._id}`);
-  };
-
   const renderBookCards = (books) =>
-    books.map((book, index) => {
-      const isFavorite = favoriteBooks.some((fb) => fb._id === book._id);
+    books.map((book) => (
+      <motion.div
+        key={book._id || book.id}
+        className="dashboardBookCard"
+        whileHover={{ scale: 1.05 }}
+        onClick={() => navigate(`/book/${book._id || book.id}`)}
+      >
+        <img src={book.coverImage || book.cover} alt={book.title} className="dashboardBookImg" />
+        <h4 className="dashboardBookTitle">{book.title}</h4>
+        <p className="dashboardBookAuthor">{book.author}</p>
+      </motion.div>
+    ));
 
-      return (
-        <motion.div
-          key={book._id}
-          className="book-card p-4 rounded-lg cursor-pointer relative"
-          variants={bookCardVariants}
-          initial="hidden"
-          animate="visible"
-          custom={index}
-          whileHover="hover"
-          data-aos="fade-up"
-        >
-          <img
-            src={book.coverImage}
-            alt={book.title}
-            className="book-image"
-            onClick={() => handleBookClick(book)}
-          />
-          <button
-            onClick={() => addToFavorites(book._id)}
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-            className={`favorite-button ${isFavorite ? "fav-active" : ""}`}
-          >
-            ❤
-          </button>
-          <h4 className="book-title">{book.title}</h4>
-          <p className="book-author">{book.author}</p>
-        </motion.div>
-      );
-    });
-
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="dashboardContainer" style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+        <h2 style={{color: 'var(--color-primary)', fontFamily: 'var(--font-heading)'}}>Loading Dashboard...</h2>
+      </div>
+    );
+  }
 
   return (
-    <div className="dashboard-container px-4 py-8 max-w-7xl mx-auto">
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "1.5rem",
-          flexWrap: "wrap",
-        }}
+    <div className="dashboardContainer">
+      <motion.div 
+        className="dashboardHeader"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
       >
-        <AnimatedWelcome userName={userName} />
-        <motion.button
-          className="logout-button"
-          onClick={handleLogout}
-          style={{ opacity: logoutOpacity, scale: logoutScale }}
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, type: "spring", stiffness: 300, damping: 22 }}
-          whileHover={{ scale: 1.1, boxShadow: "0 8px 16px rgba(0,0,0,0.3)" }}
-        >
-          Logout
-        </motion.button>
-      </div>
+        <h2 className="welcomeText">Welcome, {userName}.</h2>
+        <button className="logoutBtn" onClick={handleLogout}>Logout</button>
+      </motion.div>
 
-      <motion.section
-        className="cart-section mb-12"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        whileHover="hover"
-        data-aos="fade-right"
+      <motion.section 
+        className="dashboardSection"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
       >
-        <h3 className="text-2xl font-semibold mb-6 border-b border-green-500 pb-3">
-          Your Cart ({cartItems.length})
-        </h3>
-        {!Array.isArray(cartItems) || cartItems.length === 0 ? (
-          <>
-            <p className="text-gray-500 mb-4">Your cart is empty.</p>
-            <div className="button-group">
-  <button className="action-btn" onClick={() => navigate("/books")}>Browse Books</button>
-  <button className="action-btn go-to-cart-btn" onClick={() => navigate("/cart")}>Go to Cart</button>
-</div>
-
-          </>
+        <div className="sectionHeader">
+          <h3 className="sectionTitle">
+            <svg className="sectionIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            Your Cart ({cartItems.length})
+          </h3>
+          {cartItems.length > 0 && <Link to="/cart" className="premium-btn">Checkout</Link>}
+        </div>
+        
+        {cartItems.length === 0 ? (
+          <div className="emptyState">
+            <p>Your cart is empty.</p>
+            <Link to="/books" className="premium-btn-outline">Browse Collection</Link>
+          </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-4">{renderBookCards(cartItems)}</div>
-            <button onClick={() => navigate("/cart")} className="go-to-cart-btn" type="button">
-              Go to Cart
-            </button>
-           
-  <button className="action-btn" onClick={() => navigate("/books")}>Browse Books</button>
-          </>
+          <div className="booksGrid">{renderBookCards(cartItems)}</div>
         )}
       </motion.section>
 
-      <motion.section
-        className="favorites-section mb-12"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        whileHover="hover"
-        data-aos="fade-left"
+      <motion.section 
+        className="dashboardSection"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
       >
-        <h3 className="text-2xl font-semibold mb-6 border-b border-blue-500 pb-3">
-          Favorite Books ({favoriteBooks.length})
-        </h3>
-        {!Array.isArray(favoriteBooks) || favoriteBooks.length === 0 ? (
-          <>
-            <p className="text-gray-500">You have no favorite books saved.</p>
-           
-  <button className="action-btn" onClick={() => navigate("/books")}>Browse Books</button>
-          </>
+        <div className="sectionHeader">
+          <h3 className="sectionTitle">
+            <svg className="sectionIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            Favorites ({favoriteBooks.length})
+          </h3>
+        </div>
+        
+        {favoriteBooks.length === 0 ? (
+          <div className="emptyState">
+            <p>You haven't saved any favorites yet.</p>
+            <Link to="/books" className="premium-btn-outline">Discover Books</Link>
+          </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-4">{renderBookCards(favoriteBooks)}</div>
-            
-    <button className="action-btn" onClick={() => navigate("/books")}>Browse Books</button>
-          </>
+          <div className="booksGrid">{renderBookCards(favoriteBooks)}</div>
         )}
       </motion.section>
 
-      <motion.section
-        className="recent-section"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        whileHover="hover"
-        data-aos="fade-up"
+      <motion.section 
+        className="dashboardSection"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.6 }}
       >
-        <h3 className="text-2xl font-semibold mb-6 border-b border-purple-600 pb-3">
-          Recently Visited Books ({recentBooks.length})
-        </h3>
-        {!Array.isArray(recentBooks) || recentBooks.length === 0 ? (
-          <>
-            <p className="text-gray-500">You haven't visited any books recently.</p>
-           
-  <button className="action-btn" onClick={() => navigate("/books")}>Browse Books</button>
-          </>
+        <div className="sectionHeader">
+          <h3 className="sectionTitle">
+            <svg className="sectionIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            Recently Viewed
+          </h3>
+        </div>
+        
+        {recentBooks.length === 0 ? (
+          <div className="emptyState">
+            <p>You haven't viewed any books recently.</p>
+            <Link to="/books" className="premium-btn-outline">Start Browsing</Link>
+          </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-4">{renderBookCards(recentBooks)}</div>
-            <button onClick={() => navigate("/books")} className="browse-books-btn">
-              Browse Books
-            </button>
-          </>
+          <div className="booksGrid">{renderBookCards(recentBooks)}</div>
         )}
       </motion.section>
     </div>

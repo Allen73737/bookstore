@@ -1,283 +1,235 @@
-/* AdminPanel Styles */
-
-.admin-dashboard-wrapper.blurred {
-  filter: blur(8px);
-  pointer-events: none;
-  user-select: none;
-  transition: filter 0.3s ease;
-}
-
-.admin-panel-container {
-  position: relative;
+.adminPanelContainer {
   min-height: 100vh;
-  background: linear-gradient(135deg, #054a51, #054a51);
-  color: #f3f6f7;
-  padding: 2rem;
-  font-family: 'Poppins', sans-serif;
+  background-color: var(--color-bg);
+  padding: 100px 20px 60px;
+  font-family: var(--font-body);
+  color: var(--color-text-main);
+  position: relative;
 }
 
-.login-overlay {
+.loginOverlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(5, 74, 81, 0.9);
+  background: var(--color-bg);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10000;
+  z-index: 1000;
 }
 
-.login-container {
-  background: #104d55;
-  padding: 2rem 3rem;
-  border-radius: 16px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
-  max-width: 360px;
+.loginContainer {
+  background: var(--color-surface);
+  padding: 50px 40px;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-strong);
+  max-width: 450px;
   width: 100%;
+  border: 1px solid var(--color-primary-glow);
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 20px;
 }
 
-.login-title {
-  font-size: 2rem;
-  font-weight: 900;
-  color: #ead58a;
+.loginTitle {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  font-family: var(--font-heading);
   text-align: center;
+  margin-bottom: 10px;
 }
 
-.login-container input {
-  padding: 0.8rem 1rem;
-  border-radius: 12px;
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  background-color: #15676c;
-  color: #f3f6f7;
-  outline: none;
-  transition: background-color 0.3s ease;
-}
-
-.login-container input:focus {
-  background-color: #1d9de2;
-  color: white;
-}
-
-.login-container button {
-  background-color: #ead58a;
-  font-weight: 900;
-  padding: 0.8rem 0;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  font-size: 1.15rem;
-  color: #054a51;
-  transition: background-color 0.3s ease;
-}
-
-.login-container button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.login-container button:hover:not(:disabled) {
-  background-color: #dab64a;
-}
-
-.error-message {
-  background-color: #b84040;
-  padding: 0.6rem;
-  color: #fff5f5;
-  border-radius: 8px;
-  font-weight: 700;
+.errorMessage {
+  background: rgba(255, 75, 75, 0.1);
+  color: #ff4b4b;
+  padding: 15px;
+  border-radius: var(--border-radius-sm);
   text-align: center;
+  border: 1px solid rgba(255, 75, 75, 0.3);
 }
 
-.admin-dashboard {
-  max-width: 960px;
+.adminDashboard {
+  max-width: 1200px;
   margin: 0 auto;
-  background: hwb(49 65% 14%);
-  border-radius: 16px;
-  padding: 2rem 3rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  color: #f3f6f7;
 }
 
-.dashboard-title {
-  font-weight: 900;
+.dashboardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.dashboardTitle {
   font-size: 2.5rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(90deg, #d0b03b, #f5d33f);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  color: var(--color-primary);
+  font-family: var(--font-heading);
 }
 
-.btn {
-  cursor: pointer;
-  border-radius: 10px;
-  padding: 0.6rem 1rem;
-  font-weight: 600;
-  font-size: 1rem;
-  border: none;
-  user-select: none;
-  transition: background-color 0.3s ease;
-}
-
-.primary {
-  background-color: #1d9de2;
-  color: white;
-  margin-bottom: 1rem;
-}
-
-.primary:hover {
-  background-color: #1373b5;
-}
-
-.success {
-  background-color: #22c55e;
-  color: white;
-  margin-right: 1rem;
-}
-
-.success:hover {
-  background-color: #16a34a;
-}
-
-.cancel {
-  background-color: #bbb;
-  color: #333;
-}
-
-.cancel:hover {
-  background-color: #999;
-}
-
-.book-form {
-  background: #15676c;
-  padding: 1.5rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  color: #f3f6f7;
+.bookForm {
+  background: var(--color-surface);
+  padding: 40px;
+  border-radius: var(--border-radius-lg);
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-primary-glow);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  .book-form h3 {
-  color: #fff;
+  gap: 20px;
 }
 
+.bookForm h3 {
+  font-size: 1.8rem;
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--color-primary-glow);
+  padding-bottom: 15px;
 }
 
-.book-form label {
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.formGroup {
   display: flex;
   flex-direction: column;
-  font-weight: 700;
+  gap: 8px;
 }
 
-.book-form input,
-.book-form textarea {
-  margin-top: 0.3rem;
-  padding: 0.6rem 1rem;
-  border-radius: 10px;
-  border: none;
-  resize: vertical;
-  font-size: 1rem;
+.formGroup.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.formGroup label {
   font-weight: 600;
-  background-color: #1a555b;
-  color: #f3f6f7;
+  color: var(--color-secondary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.book-form textarea {
-  min-height: 80px;
+.formActions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .error {
-  color: #ff5f5f;
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
+  color: #ff4b4b;
+  font-size: 0.85rem;
+  margin-top: 5px;
 }
 
-.form-actions {
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 1rem;
-}
-
-.book-list ul {
+.bookList {
   list-style: none;
-  padding: 0;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.book-list-item {
+.bookListItem {
+  background: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: 25px;
   display: flex;
+  gap: 30px;
   align-items: center;
-  background-color: #104d55;
-  border-radius: 12px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  gap: 1rem;
-  color: #f3f6f7;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transition: background-color 0.3s ease;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-primary-glow);
+  transition: all 0.3s ease;
 }
 
-.book-list-item:hover {
-  background-color: #1d9de2;
-  color: white;
+.bookListItem:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-strong);
+  border-color: var(--color-primary);
 }
 
-.book-thumb {
-  width: 64px;
-  height: 96px;
+.bookThumb {
+  width: 90px;
+  height: 135px;
   object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
-.book-info {
-  flex-grow: 1;
+.bookInfo {
+  flex: 1;
 }
 
-.book-actions {
+.bookInfo h4 {
+  font-size: 1.5rem;
+  color: var(--color-primary);
+  font-family: var(--font-heading);
+  margin-bottom: 8px;
+}
+
+.bookInfo p {
+  color: var(--color-text-muted);
+  margin-bottom: 5px;
+  font-size: 0.95rem;
+}
+
+.bookInfo strong {
+  color: var(--color-secondary);
+}
+
+.bookActions {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 120px;
 }
 
-.book-actions .btn {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
+.btnEdit {
+  background: var(--color-primary);
+  color: var(--color-bg);
+  border: none;
+  padding: 10px 15px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
 }
 
-.book-actions .edit {
-  background-color: #ead58a;
-  color: #e2ecee;
+.btnEdit:hover {
+  background: var(--color-primary-hover);
 }
 
-.book-actions .edit:hover {
-  background-color: #d3bb53;
+.btnDelete {
+  background: transparent;
+  color: #ff4b4b;
+  border: 1px solid #ff4b4b;
+  padding: 10px 15px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
 }
 
-.book-actions .delete {
-  background-color: #b84040;
-  color: white;
+.btnDelete:hover {
+  background: rgba(255, 75, 75, 0.1);
 }
 
-.book-actions .delete:hover {
-  background-color: #8c2b2b;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .admin-dashboard {
-    padding: 1rem 1.5rem;
+  .formGrid {
+    grid-template-columns: 1fr;
   }
-  .book-list-item {
+  .bookListItem {
     flex-direction: column;
-    align-items: flex-start;
+    text-align: center;
   }
-  .book-thumb {
-    margin-bottom: 0.5rem;
+  .bookActions {
+    flex-direction: row;
+    width: 100%;
   }
-}
-.book-info h4 {
-  color: #fff;
+  .btnEdit, .btnDelete {
+    flex: 1;
+  }
 }

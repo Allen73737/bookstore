@@ -1,164 +1,137 @@
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+import toast from "react-hot-toast";
 import styles from "./AuthPage.module.css";
 
 const RegisterPage = () => {
-  const [registerRef, registerInView] = useInView({ threshold: 0.25, triggerOnce: true });
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const [registerName, setRegisterName] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPass, setRegisterPass] = useState("");
-  const [registerConfirmPass, setRegisterConfirmPass] = useState("");
-  const [registerMessage, setRegisterMessage] = useState(null);
-
-  const handleRegisterSubmit = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setRegisterMessage(null);
-    if (registerPass !== registerConfirmPass) {
-      alert("Passwords do not match.");
-      return;
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Account created! Please sign in.");
+        navigate("/login");
+      } else {
+        setError(data.message || "Registration failed. Please try again.");
+        toast.error(data.message || "Registration failed.");
+      }
+    } catch (err) {
+      setError("An error occurred during registration. Please try again.");
+      toast.error("Connection error. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    fetch("http://localhost:5000/api/users/register", {  // full backend URL
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: registerName, email: registerEmail, password: registerPass }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Registration failed.");
-        setRegisterMessage("Registration successful! Please log in.");
-        setRegisterName("");
-        setRegisterEmail("");
-        setRegisterPass("");
-        setRegisterConfirmPass("");
-      })
-      .catch((err) => setRegisterMessage(err.message || "Registration failed. Please try again."));
   };
 
   return (
-    <motion.div
-      className={styles.pageRoot}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 1 }}
-    >
-      <motion.section
-        ref={registerRef}
-        className={styles.authSectionLandscape}
-        initial={{ opacity: 0, y: 40 }}
-        animate={registerInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 1 }}
-        whileHover={{ scale: 1.02, boxShadow: "0 20px 54px #a6a26bbb" }}
+    <div className={styles.authPageContainer}>
+      <motion.div 
+        className={styles.authCard}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, type: "spring" }}
       >
-        <motion.div
-          className={styles.authIntro}
-          initial={{ opacity: 0, x: -18 }}
-          animate={registerInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ delay: 0.15, duration: 0.9 }}
-        >
-          <motion.h1
-            className={styles.welcomeCurvy}
-            initial={{ y: 16, scale: 1 }}
-            animate={registerInView ? { y: 0, scale: 1 } : {}}
-            transition={{ delay: 0.25, duration: 1, type: "spring" }}
+        <div className={styles.authFormSection}>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
           >
-            Welcome to ReadHaven
-          </motion.h1>
-          <motion.p
-            className={styles.authOverview}
-            initial={{ opacity: 0, y: 12 }}
-            animate={registerInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.5, duration: 1 }}
-          >
-            Join our book community and embark on a journey of endless discovery.
-          </motion.p>
-          <motion.p
-            className={styles.authCaption}
-            initial={{ opacity: 0, y: 12 }}
-            animate={registerInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ delay: 0.65, duration: 1 }}
-          >
-            Sign up to participate in reading challenges, get exclusive perks, and connect with passionate readers.
-          </motion.p>
-        </motion.div>
+            <h2 className={styles.authTitle}>Create Account</h2>
+            <p className={styles.authSubtitle}>Join our community of passionate readers.</p>
+            <div className="shimmer-line" style={{margin: '0 0 30px'}}></div>
 
-        <motion.form
-          className={styles.authForm}
-          onSubmit={handleRegisterSubmit}
-          initial={{ opacity: 0 }}
-          animate={registerInView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.9, duration: 1 }}
-        >
-          <motion.input
-            type="text"
-            placeholder="Name"
-            className={styles.authInput}
-            value={registerName}
-            onChange={(e) => setRegisterName(e.target.value)}
-            required
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={registerInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 1, duration: 0.7 }}
+            {error && (
+              <motion.div 
+                className={styles.errorMsg}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+              >
+                {error}
+              </motion.div>
+            )}
+
+            <form className={styles.authForm} onSubmit={handleRegister}>
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>Username</label>
+                <input
+                  type="text"
+                  className="premium-input"
+                  placeholder="Choose a username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>Email Address</label>
+                <input
+                  type="email"
+                  className="premium-input"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label className={styles.inputLabel}>Password</label>
+                <input
+                  type="password"
+                  className="premium-input"
+                  placeholder="Create a strong password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                className={`premium-btn ${styles.submitBtn}`}
+                disabled={loading}
+              >
+                {loading ? "Creating..." : "Register"}
+              </button>
+            </form>
+
+            <div className={styles.switchAuth}>
+              Already have an account? 
+              <Link to="/login">Sign in here</Link>
+            </div>
+          </motion.div>
+        </div>
+
+        <div className={styles.authImageSection}>
+          <img 
+            src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1000&q=80" 
+            alt="Reading Nook" 
+            className={styles.authImage} 
           />
-          <motion.input
-            type="email"
-            placeholder="Email"
-            className={styles.authInput}
-            value={registerEmail}
-            onChange={(e) => setRegisterEmail(e.target.value)}
-            required
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={registerInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 1.15, duration: 0.7 }}
-          />
-          <motion.input
-            type="password"
-            placeholder="Password"
-            className={styles.authInput}
-            value={registerPass}
-            onChange={(e) => setRegisterPass(e.target.value)}
-            required
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={registerInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 1.3, duration: 0.7 }}
-          />
-          <motion.input
-            type="password"
-            placeholder="Confirm Password"
-            className={styles.authInput}
-            value={registerConfirmPass}
-            onChange={(e) => setRegisterConfirmPass(e.target.value)}
-            required
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={registerInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 1.45, duration: 0.7 }}
-          />
-          <motion.button
-            type="submit"
-            className={`${styles.authBtnAlt} ${styles.shimmerBtn}`}
-            whileHover={{ scale: 1.1 }}
-            transition={{ type: "spring", stiffness: 300, damping: 22 }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={registerInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ delay: 1.6, duration: 0.7 }}
-          >
-            Register
-          </motion.button>
-          {registerMessage && (
-            <motion.div
-              className={styles.loginMessage}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 1.8 }}
-            >
-              {registerMessage}
-            </motion.div>
-          )}
-        </motion.form>
-      </motion.section>
-    </motion.div>
+          <div className={styles.authImageOverlay} style={{ background: 'linear-gradient(to left, transparent, var(--color-surface))' }}></div>
+        </div>
+      </motion.div>
+    </div>
   );
 };
 
