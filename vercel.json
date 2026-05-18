@@ -1,0 +1,13 @@
+{
+  "outputDirectory": "ecommerce_bookstore/dist",
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://bookstore-knfe.onrender.com/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
