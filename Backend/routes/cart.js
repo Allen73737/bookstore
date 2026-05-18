@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/Cart"); // your User model file path
 
-// Middleware: add an auth middleware that sets req.user._id for authenticated user
+// Middleware: add an auth middleware that sets req.user.userId for authenticated user
 
 // Get user's cart items with populated book details
 router.get("/", async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).populate("cart.bookId");
+    const user = await User.findById(req.user.userId).populate("cart.bookId");
     if (!user) return res.status(404).json({ message: "User not found" });
     res.json(user.cart);
   } catch (err) {
@@ -19,7 +19,7 @@ router.get("/", async (req, res) => {
 router.post("/", async (req, res) => {
   const { bookId, quantity } = req.body;
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     let item = user.cart.find((i) => i.bookId.equals(bookId));
@@ -41,7 +41,7 @@ router.post("/", async (req, res) => {
 router.patch("/:bookId", async (req, res) => {
   const { quantity } = req.body;
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     let item = user.cart.find((i) => i.bookId.equals(req.params.bookId));
@@ -60,7 +60,7 @@ router.patch("/:bookId", async (req, res) => {
 // Remove book from cart
 router.delete("/:bookId", async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     user.cart = user.cart.filter((i) => !i.bookId.equals(req.params.bookId));
@@ -76,7 +76,7 @@ router.delete("/:bookId", async (req, res) => {
 // Reserve or preorder a book
 router.post("/:bookId/reserve", async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // You could flag reservation here; for demo, just return success

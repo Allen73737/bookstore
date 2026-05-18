@@ -66,7 +66,6 @@ const Navbar = () => {
   return (
     <motion.nav
       className={`${styles.navbar} ${scrolled ? styles.navbarScrolled : ""} ${isMobileMenuOpen ? styles.navbarExpanded : ""}`}
-      ref={ref}
       variants={{
         hidden: { y: -80, opacity: 0 },
         visible: {
@@ -76,7 +75,7 @@ const Navbar = () => {
         },
       }}
       initial="hidden"
-      animate={controls}
+      animate="visible"
     >
       <div className={styles.navbarInner}>
         <motion.div

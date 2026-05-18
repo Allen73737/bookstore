@@ -14,7 +14,10 @@ const CartPage = () => {
   const [reservingId, setReservingId] = useState(null);
 
   useEffect(() => {
-    fetch("/api/user/cart")
+    const token = localStorage.getItem("jwtToken");
+    fetch("/api/user/cart", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then((res) => res.json())
       .then((data) => {
         setCartItems(Array.isArray(data) ? data : []);
@@ -29,10 +32,14 @@ const CartPage = () => {
     );
     setReservedIds((ids) => ids.filter((rid) => rid !== id));
 
+    const token = localStorage.getItem("jwtToken");
     // Optimistic UI, suppress error if backend is down
     fetch(`/api/user/cart/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
       body: JSON.stringify({ qty: newQty }),
     }).catch(() => {});
   };
@@ -43,8 +50,10 @@ const CartPage = () => {
     setReservedIds((ids) => ids.filter((rid) => rid !== id));
     toast(item ? `"${item.title}" removed from cart` : "Item removed", { icon: "🗑️" });
 
+    const token = localStorage.getItem("jwtToken");
     fetch(`/api/user/cart/${id}`, {
       method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` }
     }).catch(() => {});
   };
 
@@ -55,7 +64,11 @@ const CartPage = () => {
 
     if (book.qty <= book.inStock) {
       setReservingId(id);
-      fetch(`/api/user/cart/${id}/reserve`, { method: "POST" })
+      const token = localStorage.getItem("jwtToken");
+      fetch(`/api/user/cart/${id}/reserve`, { 
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      })
         .then((res) => {
           if (!res.ok) throw new Error("Reservation failed");
           setReservedIds((ids) => [...ids, id]);

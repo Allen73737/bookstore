@@ -56,7 +56,7 @@ const UserDashboard = ({ setUser }) => {
     fetchDashboardData();
 
     // Socket.io for real-time updates
-    const socket = io(window.location.origin);
+    const socket = io("https://bookstore-knfe.onrender.com");
     
     socket.on('cartUpdated', () => {
       fetchDashboardData();

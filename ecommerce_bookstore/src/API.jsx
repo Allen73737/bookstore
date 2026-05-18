@@ -7,6 +7,18 @@ const API = axios.create({
   },
 });
 
-// Example: Add interceptor for auth token here if you use authentication
+// Add interceptor for auth token
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("jwtToken") || localStorage.getItem("adminToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 export default API;
