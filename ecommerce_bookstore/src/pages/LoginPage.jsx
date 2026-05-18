@@ -27,6 +27,7 @@ const LoginPage = ({ setUser }) => {
 
       if (response.ok) {
         localStorage.setItem("jwtToken", data.token);
+        localStorage.setItem("userName", data.name || "User");
         if (setUser) setUser({ name: data.name || "User" });
         toast.success("Welcome back! Signed in successfully.");
         if (data.role === "admin") {

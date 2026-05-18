@@ -9,7 +9,7 @@ const UserDashboard = ({ setUser }) => {
   const [cartItems, setCartItems] = useState([]);
   const [favoriteBooks, setFavoriteBooks] = useState([]);
   const [recentBooks, setRecentBooks] = useState([]);
-  const [userName, setUserName] = useState("User");
+  const [userName, setUserName] = useState(localStorage.getItem("userName") || "User");
   const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ const UserDashboard = ({ setUser }) => {
       if (profileRes.ok) {
         const profile = await profileRes.json();
         setUserName(profile.name || "User");
+        localStorage.setItem("userName", profile.name || "User");
       }
       if (cartRes.ok) {
         const cart = await cartRes.json();
@@ -71,6 +72,7 @@ const UserDashboard = ({ setUser }) => {
 
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
+    localStorage.removeItem("userName");
     if (setUser) setUser(null);
     toast.success("Logged out successfully.");
     navigate("/");

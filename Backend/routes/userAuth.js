@@ -15,7 +15,7 @@ router.post('/register', async (req, res) => {
     const user = new User({ name, email, passwordHash });
     await user.save();
     const token = generateToken({ userId: user._id });
-    res.json({ success: true, token });
+    res.json({ success: true, token, name: user.name });
   } catch {
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
     if (!match) return res.status(401).json({ success: false, message: 'Invalid credentials' });
 
     const token = generateToken({ userId: user._id });
-    res.json({ success: true, token });
+    res.json({ success: true, token, name: user.name });
   } catch {
     res.status(500).json({ success: false, message: 'Server error' });
   }

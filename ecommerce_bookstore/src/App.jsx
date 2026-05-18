@@ -20,13 +20,15 @@ const App = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
+    const storedName = localStorage.getItem("userName");
     if (token) {
-      setUser({ name: "User" });
+      setUser({ name: storedName || "User" });
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
+    localStorage.removeItem("userName");
     setUser(null);
   };
 
