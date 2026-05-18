@@ -29,6 +29,7 @@ const UserDashboard = ({ setUser }) => {
         const profile = await profileRes.json();
         setUserName(profile.name || "User");
         localStorage.setItem("userName", profile.name || "User");
+        if (setUser) setUser({ name: profile.name || "User", role: localStorage.getItem("userRole") || "user" });
       }
       if (cartRes.ok) {
         const cart = await cartRes.json();

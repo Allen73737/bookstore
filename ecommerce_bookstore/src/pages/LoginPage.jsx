@@ -28,7 +28,8 @@ const LoginPage = ({ setUser }) => {
       if (response.ok) {
         localStorage.setItem("jwtToken", data.token);
         localStorage.setItem("userName", data.name || "User");
-        if (setUser) setUser({ name: data.name || "User" });
+        localStorage.setItem("userRole", data.role || "user");
+        if (setUser) setUser({ name: data.name || "User", role: data.role || "user" });
         toast.success("Welcome back! Signed in successfully.");
         if (data.role === "admin") {
           navigate("/admin-dashboard");

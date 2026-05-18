@@ -41,17 +41,20 @@ const adminAuthRoutes = require("./routes/adminAuth");
 const userAuthRoutes = require("./routes/userAuth");
 const booksRoutes = require("./routes/books");
 const userDashboardRoutes = require("./routes/userDashboard");
+const cartRoutes = require("./routes/cart");
+const authMiddleware = require("./middlewares/authMiddleware");
 
-// Use routes
+// Use API routes (more specific routes must be registered before general ones)
 app.use("/api/admin", adminAuthRoutes);
 app.use("/api/users", userAuthRoutes);
 app.use("/api/admin/books", booksRoutes);
+app.use("/api/user/cart", authMiddleware, cartRoutes);
 app.use("/api/user", userDashboardRoutes);
 
 // Serve Frontend in Production
 app.use(express.static(path.join(__dirname, "../ecommerce_bookstore/dist")));
 
-app.get("*", (req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, "../ecommerce_bookstore/dist/index.html"));
 });
 
@@ -60,7 +63,3 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-const cartRoutes = require("./routes/cart");
-const authMiddleware = require("./middlewares/authMiddleware"); // your auth to set req.user
-
-app.use("/api/user/cart", authMiddleware, cartRoutes);

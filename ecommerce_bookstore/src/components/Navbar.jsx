@@ -5,14 +5,19 @@ import { Link, useLocation } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
 import styles from "./Navbar.module.css";
 
-const Navbar = () => {
+const Navbar = ({ user }) => {
   const navLinks = [
     { name: "Home", to: "/" },
     { name: "Collection", to: "/books" },
-    { name: "Reservations", to: "/reservations" },
-    { name: "Dashboard", to: "/user-dashboard" },
-    { name: "Admin", to: "/admin-dashboard" },
   ];
+
+  if (user) {
+    navLinks.push({ name: "Reservations", to: "/reservations" });
+    navLinks.push({ name: "Dashboard", to: "/user-dashboard" });
+    if (user.role === "admin") {
+      navLinks.push({ name: "Admin", to: "/admin-dashboard" });
+    }
+  }
 
   const controls = useAnimation();
   const [ref, inView] = useInView({ threshold: 0 });
@@ -124,6 +129,23 @@ const Navbar = () => {
           <motion.li variants={itemVariants}>
             <ThemeToggle />
           </motion.li>
+
+          {user ? (
+            <motion.li variants={itemVariants}>
+              <Link to="/user-dashboard" className={styles.userBadge}>
+                <div className={styles.avatar}>
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className={styles.userNameText}>{user.name}</span>
+              </Link>
+            </motion.li>
+          ) : (
+            <motion.li variants={itemVariants}>
+              <Link to="/login" className="premium-btn" style={{padding: "8px 18px", fontSize: "0.85rem", textDecoration: "none", textTransform: "uppercase", letterSpacing: "1px"}}>
+                Sign In
+              </Link>
+            </motion.li>
+          )}
         </ul>
 
         {/* Mobile Hamburger Button */}
@@ -155,9 +177,9 @@ const Navbar = () => {
             <ul className={styles.mobileNavLinks}>
               {navLinks.map(({ name, to }) => (
                 <motion.li 
-                  key={name}
-                  variants={mobileItemVariants}
-                  className={`${styles.mobileNavItem} ${location.pathname === to ? styles.mobileActiveLink : ""}`}
+                   key={name}
+                   variants={mobileItemVariants}
+                   className={`${styles.mobileNavItem} ${location.pathname === to ? styles.mobileActiveLink : ""}`}
                 >
                   <Link to={to} className={styles.mobileNavLink}>
                     {name}
@@ -184,6 +206,23 @@ const Navbar = () => {
                   <ThemeToggle />
                 </div>
               </motion.li>
+
+              {user ? (
+                <motion.li variants={mobileItemVariants} className={styles.mobileNavItem}>
+                  <Link to="/user-dashboard" className={styles.userBadge} style={{justifyContent: "center", margin: "10px 20px"}}>
+                    <div className={styles.avatar}>
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className={styles.userNameText}>{user.name}</span>
+                  </Link>
+                </motion.li>
+              ) : (
+                <motion.li variants={mobileItemVariants} className={styles.mobileNavItem}>
+                  <Link to="/login" className="premium-btn" style={{display: "block", textAlign: "center", margin: "10px 20px", textDecoration: "none", textTransform: "uppercase", letterSpacing: "1px"}}>
+                    Sign In
+                  </Link>
+                </motion.li>
+              )}
             </ul>
           </motion.div>
         )}

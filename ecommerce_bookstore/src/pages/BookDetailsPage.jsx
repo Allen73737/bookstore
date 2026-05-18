@@ -117,24 +117,24 @@ const BookDetailsPage = () => {
     <div className={styles.pageContainer}>
       <motion.div 
         className={styles.contentWrapper}
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
       >
         <motion.div 
           className={styles.imageSection}
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
         >
           <img src={book.coverImage} alt={book.title} className={styles.bookCover} />
         </motion.div>
 
         <motion.div 
           className={styles.detailsSection}
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
         >
           <div className={styles.badgeContainer}>
             <span className={styles.badge}>{book.category}</span>

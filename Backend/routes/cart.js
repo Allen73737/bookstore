@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 // Add book to cart or increase qty
-router.post("/:bookId?", async (req, res) => {
+const addToCartHandler = async (req, res) => {
   const bookId = req.params.bookId || req.body.bookId;
   const quantity = req.body.quantity || req.body.qty || 1;
   try {
@@ -36,7 +36,10 @@ router.post("/:bookId?", async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: "Server error" });
   }
-});
+};
+
+router.post("/:bookId", addToCartHandler);
+router.post("/", addToCartHandler);
 
 // Update quantity in cart for specific book
 router.patch("/:bookId", async (req, res) => {

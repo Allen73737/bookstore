@@ -21,14 +21,16 @@ const App = () => {
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     const storedName = localStorage.getItem("userName");
+    const storedRole = localStorage.getItem("userRole");
     if (token) {
-      setUser({ name: storedName || "User" });
+      setUser({ name: storedName || "User", role: storedRole || "user" });
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("userName");
+    localStorage.removeItem("userRole");
     setUser(null);
   };
 
