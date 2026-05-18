@@ -1,9 +1,10 @@
 import React from "react";
 import BookCard from "./BookCard";
+import styles from "./BookList.module.css";
 
 const BookList = ({ books }) => {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+    <div className={styles.grid}>
       {books.map((book) => (
         <BookCard key={book._id} book={book} />
       ))}
