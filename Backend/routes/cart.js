@@ -16,8 +16,9 @@ router.get("/", async (req, res) => {
 });
 
 // Add book to cart or increase qty
-router.post("/", async (req, res) => {
-  const { bookId, quantity } = req.body;
+router.post("/:bookId?", async (req, res) => {
+  const bookId = req.params.bookId || req.body.bookId;
+  const quantity = req.body.quantity || req.body.qty || 1;
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -39,7 +40,7 @@ router.post("/", async (req, res) => {
 
 // Update quantity in cart for specific book
 router.patch("/:bookId", async (req, res) => {
-  const { quantity } = req.body;
+  const quantity = req.body.quantity || req.body.qty;
   try {
     const user = await User.findById(req.user.userId);
     if (!user) return res.status(404).json({ message: "User not found" });

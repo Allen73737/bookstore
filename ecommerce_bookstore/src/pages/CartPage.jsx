@@ -20,7 +20,22 @@ const CartPage = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        setCartItems(Array.isArray(data) ? data : []);
+        if (Array.isArray(data)) {
+          const mapped = data
+            .filter(item => item && item.bookId) // safe guard in case a book was deleted
+            .map(item => ({
+              id: item.bookId._id,
+              title: item.bookId.title,
+              author: item.bookId.author,
+              cover: item.bookId.coverImage || item.bookId.cover || "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=500&q=80",
+              price: item.bookId.price,
+              inStock: item.bookId.inStock || 10,
+              qty: item.quantity,
+            }));
+          setCartItems(mapped);
+        } else {
+          setCartItems([]);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
