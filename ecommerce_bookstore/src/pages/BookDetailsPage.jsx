@@ -138,7 +138,7 @@ const BookDetailsPage = () => {
         >
           <div className={styles.badgeContainer}>
             <span className={styles.badge}>{book.category}</span>
-            {book.inStock > 0 && <span className={styles.badge} style={{background: '#a4ceb3', color: '#054a51'}}>In Stock</span>}
+            {book.inStock > 0 && <span className={styles.badge} style={{background: 'var(--color-primary-glow)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)'}}>In Stock</span>}
           </div>
           
           <h1 className={styles.title}>{book.title}</h1>
