@@ -1,4 +1,9 @@
 {
+  "name": "bookstore-root",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm install --prefix ecommerce_bookstore && npm run build --prefix ecommerce_bookstore"
+  },
   "dependencies": {
     "vite": "^7.1.10"
   }
