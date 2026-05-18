@@ -34,7 +34,7 @@ router.post('/favorites/:bookId', async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const bookId = req.params.bookId;
-    const isFavorited = user.favorites.includes(bookId);
+    const isFavorited = user.favorites.some(id => id.toString() === bookId);
 
     if (isFavorited) {
       user.favorites = user.favorites.filter(id => id.toString() !== bookId);

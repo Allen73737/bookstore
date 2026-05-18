@@ -90,9 +90,9 @@ const BookDetailsPage = () => {
       <div className={styles.pageContainer}>
         <motion.div 
           className={styles.loading}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
         >
           Loading Masterpiece...
         </motion.div>
